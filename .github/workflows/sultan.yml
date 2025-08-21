@@ -241,6 +241,7 @@ jobs:
           command: |
             set -e
             set -x
+            set -fPIC
             cd "$CONFIG"
             echo "Building the kernel..."
             
