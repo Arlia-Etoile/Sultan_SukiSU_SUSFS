@@ -232,7 +232,7 @@ jobs:
           echo "Running sed commands..."
           sed -i 's/CONFIG_LOCALVERSION="-Sultan"/CONFIG_LOCALVERSION="-Wild"/' ./arch/arm64/configs/${{ inputs.codename }}_defconfig
 
-      - name: Build with retry
+      - name: 编译内核 (带重试机制)
         uses: nick-fields/retry@v3
         with:
           timeout_minutes: 30
@@ -243,19 +243,30 @@ jobs:
             set -x
             cd "$CONFIG"
             echo "Building the kernel..."
-            # replace BUILD_SYSTEM_DLKM=1 with BUILD_SYSTEM_DLKM=0
-            sed -i 's/BUILD_SYSTEM_DLKM=1/BUILD_SYSTEM_DLKM=0/' common/build.config.gki.aarch64
-            # del line MODULES_ORDER=android/gki_aarch64_modules 
-            sed -i '/MODULES_ORDER=android\/gki_aarch64_modules/d' common/build.config.gki.aarch64
-            sed -i '/KMI_SYMBOL_LIST_STRICT_MODE/d' common/build.config.gki.aarch64
+            
+            # 路径修正：检查 build.config.gki.aarch64 是否在源码根目录
+            # 如果此文件不在根目录，你需要修改下面的路径
+            BUILD_CONFIG_FILE="build.config.gki.aarch64"
 
+            if [ -f "$BUILD_CONFIG_FILE" ]; then
+              sed -i \
+                -e 's/BUILD_SYSTEM_DLKM=1/BUILD_SYSTEM_DLKM=0/' \
+                -e '/MODULES_ORDER=android\/gki_aarch64_modules/d' \
+                -e '/KMI_SYMBOL_LIST_STRICT_MODE/d' \
+                "$BUILD_CONFIG_FILE"
+            fi
+
+            # 区分 build.sh 和 make 编译系统
             if [ -f "build/build.sh" ]; then
-              # LTO=thin SYSTEM_DLKM_RE_SIGN=0 BUILD_SYSTEM_DLKM=0 KMI_SYMBOL_LIST_STRICT_MODE=0 BUILD_CONFIG=common/build.config.gki.aarch64 build/build.sh CC="/usr/bin/ccache clang" || exit 1
-              LTO=thin BUILD_CONFIG=common/build.config.gki.aarch64 build/build.sh CC="/usr/bin/ccache clang" || exit 1
+              echo "Using build.sh..."
+              LTO=thin BUILD_CONFIG="$BUILD_CONFIG_FILE" build/build.sh CC="/usr/bin/ccache clang"
             else
-              # tools/bazel build --disk_cache=/home/runner/.cache/bazel --config=fast --lto=full --copt=-Wno-error --copt=-mllvm --copt=-polly --copt=-mllvm --copt=-polly-vectorizer=stripmine --linkopt="-fuse-ld=lld" //common:kernel_aarch64_dist|| exit 1
-              # tools/bazel build --disk_cache=/home/runner/.cache/bazel --config=fast --lto=thin //common:kernel_aarch64_dist || exit 1
-              tools/bazel build --disk_cache=/home/runner/.cache/bazel --config=fast --lto=thin //common:kernel_aarch64_dist || exit 1
+              echo "Using make..."
+              if [ "${{ inputs.codename }}" == "zumapro" ]; then
+                export KCFLAGS="-march=armv8.6-a -O3 --param=min-pagesize=0"
+              fi
+              make ${{ inputs.codename }}_defconfig -j$(nproc --all)
+              make -j$(nproc --all)
             fi
             ccache --show-stats
 
