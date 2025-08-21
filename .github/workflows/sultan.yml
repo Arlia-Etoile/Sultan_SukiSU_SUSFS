@@ -101,6 +101,7 @@ jobs:
           git clone https://github.com/WildPlusKernel/AnyKernel3.git -b "$ANYKERNEL_BRANCH"
           git clone https://github.com/ShirkNeko/susfs4ksu.git -b gki-android14-6.1
           git clone https://github.com/kerneltoast/android_kernel_google_zuma
+          git clone https://github.com/WildPlusKernel/kernel_patches.git
           # Sukisu的补丁仓库
           git clone https://github.com/ShirkNeko/SukiSU_patch.git
 
@@ -120,6 +121,11 @@ jobs:
           
           echo "Adding KernelSU..."
           curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
+
+      - name: Setup tmate session for debugging
+        uses: mxschmitt/action-tmate@v3
+        # 仅在需要调试时取消下面这行的注释
+        # if: failure() || success()
 
       - name: Apply SUSFS Patches
         run: |
@@ -224,6 +230,8 @@ jobs:
           
           echo "Running sed commands..."
           sed -i 's/CONFIG_LOCALVERSION="-Sultan"/CONFIG_LOCALVERSION="-Wild"/' ./arch/arm64/configs/${{ inputs.codename }}_defconfig
+
+
 
       - name: 编译内核 (带重试机制)
         uses: nick-fields/retry@v3
