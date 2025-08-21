@@ -266,8 +266,6 @@ jobs:
                 export KCFLAGS="-march=armv8.6-a -O3 --param=min-pagesize=0"
               fi
               
-              export CFLAGS="-fPIC"
-              
               make ${{ inputs.codename }}_defconfig -j$(nproc --all)
               make -j$(nproc --all)
             fi
