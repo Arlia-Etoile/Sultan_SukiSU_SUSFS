@@ -49,21 +49,21 @@ jobs:
         #- build-kernel-zumapro
     if: ${{ inputs.make_release }}
     env:
-      REPO_OWNER: TheWildJames
-      REPO_NAME: Sultan_KernelSU_SUSFS
+      REPO_OWNER: Arlia-Etoile
+      REPO_NAME: Sultan_SukiSU_SUSFS
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       RELEASE_NAME: "*TEST BUILD* Sultan Kernels With KernelSU Next & SUSFS v1.5.9 *TEST BUILD*"
       RELEASE_NOTES: |
-        This release contains KernelSU Next and SUSFS v1.5.9
+        This release contains SukiSU Ultra and SUSFS v1.5.9
         
         Module: 
         -> https://github.com/sidex15/ksu_module_susfs
         
         Non-Official Managers:
-        -> https://github.com/KernelSU-Next/KernelSU-Next
+        -> https://github.com/SukiSU-Ultra/SukiSU-Ultra
         
         Features:
-        [+] KernelSU-Next
+        [+] SukiSU-Ultra
         [+] SUSFS v1.5.9
         [+] Maphide LineageOS Detections
         [+] Futile Maphide for jit-zygote-cache Detections
@@ -97,10 +97,10 @@ jobs:
             git push origin $NEW_TAG
             
       # Download Artifacts for A12 (Only if A12 Build is successful or input is true or empty)
-      - name: Download Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ./downloaded-artifacts
+      #- name: Download Artifacts
+        #uses: actions/download-artifact@v4
+        #with:
+          #path: ./downloaded-artifacts
 
       # Create GitHub Release and upload files if make_release is true
       - name: Create GitHub Release
