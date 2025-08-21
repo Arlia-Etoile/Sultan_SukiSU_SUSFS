@@ -99,7 +99,7 @@ jobs:
 
           # Clone repositories using the branch names
           git clone https://github.com/WildPlusKernel/AnyKernel3.git -b "$ANYKERNEL_BRANCH"
-          git clone https://gitlab.com/simonpunk/susfs4ksu/-/tree/2413de900c8e34d46dee859996b5364ba3ef8896/
+          git clone https://github.com/ShirkNeko/susfs4ksu.git -b gki-android14-6.1
           git clone https://github.com/kerneltoast/android_kernel_google_zuma
           # Sukisu的补丁仓库
           git clone https://github.com/ShirkNeko/SukiSU_patch.git
