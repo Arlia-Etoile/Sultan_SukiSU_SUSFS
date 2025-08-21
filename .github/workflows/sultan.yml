@@ -122,11 +122,6 @@ jobs:
           echo "Adding KernelSU..."
           curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-test
 
-      - name: Setup tmate session for debugging
-        uses: mxschmitt/action-tmate@v3
-        # 仅在需要调试时取消下面这行的注释
-        # if: failure() || success()
-
       - name: Apply SUSFS Patches
         run: |
           echo "Changing to configuration directory: $CONFIG..."
@@ -305,3 +300,9 @@ jobs:
           name: kernel-${{ inputs.codename }}
           path: |
             *.zip
+
+      - name: Debug on Failure with tmate
+        if: failure()
+        uses: mxschmitt/action-tmate@v3
+        with:
+             limit-access-to-actor: true
