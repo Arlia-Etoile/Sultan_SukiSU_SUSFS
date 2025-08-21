@@ -150,7 +150,7 @@ jobs:
           cd "$CONFIG"
           # Apply additional patch
           echo "Applying hooks for SukiSU..."
-          cp ../../SukiSU_patch/hooks/syscall_hooks.patch ./
+          cp ../SukiSU_patch/hooks/syscall_hooks.patch ./
           patch -p1 -F 3 < syscall_hooks.patch
 
           
@@ -159,7 +159,7 @@ jobs:
           echo "Changing to configuration directory: $CONFIG..."
           cd "$CONFIG"
           # Apply additional patch
-          cp ../../SukiSU_patch/69_hide_stuff.patch ./
+          cp ../SukiSU_patch/69_hide_stuff.patch ./
           patch -p1 -F 3 < 69_hide_stuff.patch
 
       - name: 设置BBR为默认拥塞算法
