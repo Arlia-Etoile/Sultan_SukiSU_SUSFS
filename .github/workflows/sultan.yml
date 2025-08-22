@@ -1,4 +1,4 @@
-name: Sultan-1
+name: Sultan
 permissions:
   contents: write  # Allow writing to repository contents (for pushing tags)
   actions: write   # Allows triggering actions
@@ -90,7 +90,11 @@ jobs:
           cp ../susfs4ksu/kernel_patches/fs/* ./fs/
           cp ../susfs4ksu/kernel_patches/include/linux/* ./include/linux/
 
+          echo "Applying SUSFS patches for SukiSU..."
+
           cd ./KernelSU
+
+          echo "Applying SukiSU specific SUSFS patch..."
           
           # Change to common directory and apply SUSFS patch
           cd ..
