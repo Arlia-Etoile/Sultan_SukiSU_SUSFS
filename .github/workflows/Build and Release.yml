@@ -1,0 +1,118 @@
+# 工作流名称，更新为 Pixel 8 系列
+name: Build and Release Official Pixel 8 Kernels
+
+permissions:
+  contents: write
+  actions: write
+  
+on:
+  workflow_dispatch:
+    inputs:
+      make_release:
+        description: 'Do you want to create a release?'
+        required: true
+        type: boolean
+        default: true
+        
+jobs:
+
+  build-kernel-shusky:
+
+    uses: ./.github/workflows/official_kernel_build.yml
+    secrets: inherit
+    with:
+      # 为 Pixel 8 (shusky) 设置参数
+      codename: "shusky"
+      # 'repo' 参数已被移除，因为新的工作流不再需要它
+      android_version: "android14"
+      kernel_version: "6.1"
+      
+  build-kernel-husky:
+    uses: ./.github/workflows/official_kernel_build.yml
+    secrets: inherit
+    with:
+      # 为 Pixel 8 Pro (husky) 设置参数
+      codename: "husky"
+      android_version: "android14"
+      kernel_version: "6.1"
+
+  trigger-release:
+    runs-on: ubuntu-latest
+
+    needs:
+        - build-kernel-shusky
+        - build-kernel-husky
+    if: ${{ inputs.make_release }}
+    env:
+      REPO_OWNER: Arlia-Etoile # 可以根据需要修改你的 GitHub 用户名
+      REPO_NAME: Sultan_SukiSU_SUSFS # 可以根据需要修改你的仓库名
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      RELEASE_NAME: "*TEST BUILD* Official Kernels (Pixel 8) With KernelSU & SUSFS *TEST BUILD*"
+      RELEASE_NOTES: |
+        This release contains SukiSU Ultra and SUSFS based on official Google kernel source.
+        
+        Module: 
+        -> https://github.com/sidex15/ksu_module_susfs
+        
+        Non-Official Managers:
+        -> https://github.com/SukiSU-Ultra/SukiSU-Ultra
+        
+        Features:
+        [+] SukiSU-Ultra
+        [+] SUSFS
+        [+] Magic Mount Support
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Generate and Create New Tag
+        run: |
+            LATEST_TAG=$(gh api repos/$REPO_OWNER/$REPO_NAME/tags --jq '.[0].name')
+            if [ -z "$LATEST_TAG" ]; then
+              LATEST_TAG="v1.6.0-r0"  # 可以设置一个新的起始版本号
+            fi
+            
+            NEW_TAG=$(echo "$LATEST_TAG" | awk -F'-r' '{suffix=$2; if (!suffix) suffix=0; suffix++; printf "%s-r%d", $1, suffix}')
+            
+            echo "New tag: $NEW_TAG"
+            echo "NEW_TAG=${NEW_TAG}" >> $GITHUB_ENV
+            
+            git tag $NEW_TAG
+            git push origin $NEW_TAG
+            
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./downloaded-artifacts
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ env.NEW_TAG }}
+          prerelease: true
+          release_name: ${{ env.RELEASE_NAME }}
+          body: ${{ env.RELEASE_NOTES }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Assets Dynamically
+        run: |
+          # 这个循环会查找所有下载下来的编译产物并上传
+          for file in ./downloaded-artifacts/kernel-*/*; do
+              if [ -d "$file" ]; then
+                  continue
+              fi
+              echo "Uploading $file..."
+              gh release upload ${{ env.NEW_T }} "$file"
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_TAG: ${{ env.NEW_TAG }}
+
+      - name: Display Files Uploaded
+        run: |
+          echo "GitHub release created with the following files:"
+          ls -R ./downloaded-artifacts
