@@ -63,9 +63,7 @@ jobs:
           
           echo "Cloning official Pixel 8 (shusky) kernel source..."
           git clone --depth=1 https://android.googlesource.com/device/google/shusky-kernels/6.1 kernel_source
-      
-      # ... 后续的打补丁、添加KernelSU等步骤保持不变 ...
-      # 这些步骤将在新的 'kernel_source' 目录中执行
+
 
       - name: Add KernelSU
         run: |
