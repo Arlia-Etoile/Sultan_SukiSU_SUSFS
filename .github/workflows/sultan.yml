@@ -78,23 +78,23 @@ jobs:
           echo "Adding KernelSU..."
           curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-test
 
-      #- name: Apply SUSFS Patches
-        #run: |
-          #echo "Changing to configuration directory: $CONFIG..."
-          #cd "$CONFIG"
+      - name: Apply SUSFS Patches
+        run: |
+          echo "Changing to configuration directory: $CONFIG..."
+          cd "$CONFIG"
           
-          #echo "Applying SUSFS patches..."
+          echo "Applying SUSFS patches..."
           
           # Copy SUSFS patches
-          #cp ../susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}.patch ./
-          #cp ../susfs4ksu/kernel_patches/fs/* ./fs/
-          #cp ../susfs4ksu/kernel_patches/include/linux/* ./include/linux/
+          cp ../susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}.patch ./
+          cp ../susfs4ksu/kernel_patches/fs/* ./fs/
+          cp ../susfs4ksu/kernel_patches/include/linux/* ./include/linux/
 
-          #cd ./KernelSU
+          cd ./KernelSU
           
           # Change to common directory and apply SUSFS patch
-          #cd ..
-          #patch -p1 < 50_add_susfs_in_gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}.patch || true
+          cd ..
+          patch -p1 < 50_add_susfs_in_gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}.patch || true
 
       - name: Apply KSU Hooks
         run: |
